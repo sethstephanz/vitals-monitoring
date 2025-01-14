@@ -17,7 +17,7 @@
   */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
-#include "main.h"
+#include "patient_data.h"
 #include "usb_host.h"
 
 /* Private includes ----------------------------------------------------------*/

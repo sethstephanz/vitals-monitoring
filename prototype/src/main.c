@@ -9,6 +9,7 @@ typedef struct
     int heartRate;     // bpm
 } PatientData;
 
+
 void generateMockData(PatientData *data);
 void logData(PatientData *data);
 
