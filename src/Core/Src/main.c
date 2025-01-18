@@ -115,12 +115,13 @@ int main(void)
   MX_USB_HOST_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
+  uint8_t tx_normal[] = "All vitals normal.\n\r";
+  PatientData patientData;
 
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  uint8_t tx_normal[] = "All vitals normal.\n\r";
   while (1)
   {
     /* USER CODE END WHILE */
@@ -131,8 +132,7 @@ int main(void)
 
     // data read and transmit
 
-
-	HAL_UART_Transmit(&huart2, tx_normal, sizeof(tx_normal), HAL_MAX_DELAY);
+	// HAL_UART_Transmit(&huart2, tx_normal, sizeof(tx_normal), HAL_MAX_DELAY);
     generate_data(&patientData);
     log_data(&patientData);
 
