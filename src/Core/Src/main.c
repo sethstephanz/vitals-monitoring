@@ -20,10 +20,10 @@
 #include "main.h"
 #include "usb_host.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
-#include <unistd.h>
+//#include <stdio.h>
+//#include <stdlib.h>
+//#include <time.h>
+//#include <unistd.h>
 
 #include "patient_data.h"
 #include "generate_data.h"
@@ -115,7 +115,7 @@ int main(void)
   MX_USB_HOST_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
-  uint8_t tx_normal[] = "All vitals normal.\n\r";
+
   PatientData patientData;
 
   /* USER CODE END 2 */
@@ -130,9 +130,7 @@ int main(void)
     /* USER CODE BEGIN 3 */
     HAL_GPIO_TogglePin(blue_led_GPIO_Port, blue_led_Pin); // visually indicate program is running
 
-    // data read and transmit
-
-	// HAL_UART_Transmit(&huart2, tx_normal, sizeof(tx_normal), HAL_MAX_DELAY);
+    // data gen (sensor) and log
     generate_data(&patientData);
     log_data(&patientData);
 
