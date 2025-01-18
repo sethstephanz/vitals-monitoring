@@ -10,7 +10,7 @@
 
 int main()
 {
-    srand(time(NULL));
+    
     PatientData patientData;
 
     // data stream
