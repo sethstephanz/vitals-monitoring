@@ -3,14 +3,14 @@
 #include <time.h>
 #include <unistd.h>
 
-#include "patient_data.h"
-#include "monitor.h"
+#include "constants.h"
 #include "generate_data.h"
 #include "log_data.h"
+#include "patient_data.h"
 
 int main()
 {
-    
+
     PatientData patientData;
 
     // data stream

@@ -20,6 +20,15 @@
 #include "main.h"
 #include "usb_host.h"
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <unistd.h>
+
+#include "patient_data.h"
+#include "generate_data.h"
+#include "log_data.h"
+
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
@@ -124,6 +133,10 @@ int main(void)
 
 
 	HAL_UART_Transmit(&huart2, tx_normal, sizeof(tx_normal), HAL_MAX_DELAY);
+    generate_data(&patientData);
+    log_data(&patientData);
+
+    // simulate delay (1s)
 	HAL_Delay(1000);
   }
   /* USER CODE END 3 */
