@@ -24,6 +24,8 @@
 //#include <stdlib.h>
 //#include <time.h>
 //#include <unistd.h>
+#include <string.h>
+#include <stdint.h>
 
 #include "patient_data.h"
 #include "generate_data.h"
@@ -116,7 +118,25 @@ int main(void)
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
 
-  PatientData patientData;
+  PatientData patient_data;
+//  float float_buffer[100];
+  int data_buffer[10];
+
+  char temp[] = "Body temperature: ";
+  char o2[] = "Blood oxygen percentage: ";
+  char heartrate[] = "Heart rate: ";
+  char newline[] = "\n";
+
+  char msg_ok[] = "Vitals stable.\n";
+
+  char msg_brady[] = "Alert: Bradycardia detected.\n";
+  char msg_tachy[] = "Alert: Tachycardia detected.\n";
+
+  char msg_low_o2[] = "Alert: Low oxygen saturation detected.\n";
+
+  char msg_hypo[] = "Alert: Hypothermia detected.\n";
+  char msg_fever[] = "Alert: Fever detected.\n";
+  int8_t normal = 1;
 
   /* USER CODE END 2 */
 
@@ -131,8 +151,48 @@ int main(void)
     HAL_GPIO_TogglePin(blue_led_GPIO_Port, blue_led_Pin); // visually indicate program is running
 
     // data gen (sensor) and log
-    generate_data(&patientData);
-    log_data(&patientData);
+    generate_data(&patient_data);
+    // log_data(&patientData);
+
+    memcpy(data_buffer, (void *)patient_data.temperature, sizeof(patient_data.temperature));
+    HAL_UART_Transmit(&huart2, (uint8_t *)temp, sizeof(temp), HAL_MAX_DELAY);
+    HAL_UART_Transmit(&huart2, (uint8_t *)data_buffer, sizeof(data_buffer), HAL_MAX_DELAY);
+    HAL_UART_Transmit(&huart2, (uint8_t *)newline, sizeof(newline), HAL_MAX_DELAY);
+    memcpy(data_buffer, (void *)patient_data.temperature, sizeof(patient_data.oxygen_percentage));
+    HAL_UART_Transmit(&huart2, (uint8_t *)o2, sizeof(o2), HAL_MAX_DELAY);
+    HAL_UART_Transmit(&huart2, (uint8_t *)data_buffer, sizeof(data_buffer), HAL_MAX_DELAY);
+    HAL_UART_Transmit(&huart2, (uint8_t *)newline, sizeof(newline), HAL_MAX_DELAY);
+    memcpy(data_buffer, (void *)patient_data.temperature, sizeof(patient_data.heartRate));
+    HAL_UART_Transmit(&huart2, (uint8_t *)heartrate, sizeof(heartrate), HAL_MAX_DELAY);
+	HAL_UART_Transmit(&huart2, (uint8_t *)data_buffer, sizeof(data_buffer), HAL_MAX_DELAY);
+	HAL_UART_Transmit(&huart2, (uint8_t *)newline, sizeof(newline), HAL_MAX_DELAY);
+
+    if (patient_data.temperature > 98) {
+    	HAL_UART_Transmit(&huart2, (uint8_t *)msg_fever, sizeof(msg_fever), HAL_MAX_DELAY);
+        normal = 0;
+    }
+    else if (patient_data.temperature < 95) {
+    	HAL_UART_Transmit(&huart2, (uint8_t *)msg_hypo, sizeof(msg_hypo), HAL_MAX_DELAY);
+        normal = 0;
+    }
+
+    if (patient_data.heartRate > 100) {
+    	HAL_UART_Transmit(&huart2, (uint8_t *)msg_tachy, sizeof(msg_tachy), HAL_MAX_DELAY);
+        normal = 0;
+    }
+    else if (patient_data.temperature < 95) {
+    	HAL_UART_Transmit(&huart2, (uint8_t *)msg_brady, sizeof(msg_brady), HAL_MAX_DELAY);
+        normal = 0;
+    }
+
+    if (patient_data.oxygen_percentage < 90) {
+    	HAL_UART_Transmit(&huart2, (uint8_t *)msg_low_o2, sizeof(msg_low_o2), HAL_MAX_DELAY);
+        normal = 0;
+    }
+
+    if (normal) {
+    	HAL_UART_Transmit(&huart2, (uint8_t *)msg_ok, sizeof(msg_ok), HAL_MAX_DELAY);
+    }
 
     // simulate delay (1s)
 	HAL_Delay(1000);

@@ -3,9 +3,9 @@
 
 typedef struct
 {
-    float temperature;       // in Fahrenheit
+    int temperature;       // in Fahrenheit
     int heartRate;           // bpm
-    float oxygen_percentage; // blood oxygen percentage
+    int oxygen_percentage; // blood oxygen percentage
 } PatientData;
 
 #endif // PATIENT_DATA_H
