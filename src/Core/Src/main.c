@@ -188,15 +188,18 @@ int main(void)
     	HAL_GPIO_TogglePin(green_led_GPIO_Port, green_led_Pin); // vitals ok
     }
     else {
-    	HAL_GPIO_TogglePin(green_led_GPIO_Port, green_led_Pin);
     	HAL_GPIO_TogglePin(red_led_GPIO_Port, red_led_Pin); // alert
     }
 
     // reset flag
     normal = 1;
 
-    // simulate delay (1s)
-	HAL_Delay(1000);
+    // simulate delay (1s), pause so can see status, then reset lights for next iteration
+	HAL_Delay(500);
+    HAL_GPIO_WritePin(red_led_GPIO_Port, red_led_Pin, GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(green_led_GPIO_Port, green_led_Pin, GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(blue_led_GPIO_Port, blue_led_Pin, GPIO_PIN_RESET);
+    HAL_Delay(500);
 
   }
   /* USER CODE END 3 */
