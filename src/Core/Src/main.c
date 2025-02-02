@@ -19,17 +19,9 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "usb_host.h"
-
-//#include <stdio.h>
-//#include <stdlib.h>
-//#include <time.h>
-//#include <unistd.h>
-#include <string.h>
-#include <stdint.h>
-
 #include "patient_data.h"
+#include <string.h>
 #include "generate_data.h"
-#include "log_data.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -167,6 +159,7 @@ int main(void)
 	HAL_UART_Transmit(&huart2, (uint8_t *)data_buffer, sizeof(data_buffer), HAL_MAX_DELAY);
 	HAL_UART_Transmit(&huart2, (uint8_t *)newline, sizeof(newline), HAL_MAX_DELAY);
 
+
     if (patient_data.temperature > 98) {
     	HAL_UART_Transmit(&huart2, (uint8_t *)msg_fever, sizeof(msg_fever), HAL_MAX_DELAY);
         normal = 0;
@@ -180,7 +173,7 @@ int main(void)
     	HAL_UART_Transmit(&huart2, (uint8_t *)msg_tachy, sizeof(msg_tachy), HAL_MAX_DELAY);
         normal = 0;
     }
-    else if (patient_data.temperature < 95) {
+    else if (patient_data.heartRate < 60) {
     	HAL_UART_Transmit(&huart2, (uint8_t *)msg_brady, sizeof(msg_brady), HAL_MAX_DELAY);
         normal = 0;
     }
@@ -192,10 +185,19 @@ int main(void)
 
     if (normal) {
     	HAL_UART_Transmit(&huart2, (uint8_t *)msg_ok, sizeof(msg_ok), HAL_MAX_DELAY);
+    	HAL_GPIO_TogglePin(green_led_GPIO_Port, green_led_Pin); // vitals ok
     }
+    else {
+    	HAL_GPIO_TogglePin(green_led_GPIO_Port, green_led_Pin);
+    	HAL_GPIO_TogglePin(red_led_GPIO_Port, red_led_Pin); // alert
+    }
+
+    // reset flag
+    normal = 1;
 
     // simulate delay (1s)
 	HAL_Delay(1000);
+
   }
   /* USER CODE END 3 */
 }
@@ -410,7 +412,7 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(OTG_FS_PowerSwitchOn_GPIO_Port, OTG_FS_PowerSwitchOn_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOD, LD4_Pin|LD3_Pin|red_led_Pin|blue_led_Pin
+  HAL_GPIO_WritePin(GPIOD, green_led_Pin|orange_led_Pin|red_led_Pin|blue_led_Pin
                           |Audio_RST_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : CS_I2C_SPI_Pin */
@@ -455,9 +457,9 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Alternate = GPIO_AF5_SPI2;
   HAL_GPIO_Init(CLK_IN_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : LD4_Pin LD3_Pin red_led_Pin blue_led_Pin
+  /*Configure GPIO pins : green_led_Pin orange_led_Pin red_led_Pin blue_led_Pin
                            Audio_RST_Pin */
-  GPIO_InitStruct.Pin = LD4_Pin|LD3_Pin|red_led_Pin|blue_led_Pin
+  GPIO_InitStruct.Pin = green_led_Pin|orange_led_Pin|red_led_Pin|blue_led_Pin
                           |Audio_RST_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
