@@ -154,31 +154,19 @@ int main(void)
     int bt_length = snprintf(data_buffer, UART_BUFFER_SIZE, "%d\r\n", body_temp);
     HAL_UART_Transmit(&huart3, (uint8_t *)temp, sizeof(temp), HAL_MAX_DELAY);
     HAL_UART_Transmit(&huart3, (uint8_t *)data_buffer, bt_length, HAL_MAX_DELAY);
-    //memset(data_buffer, 0, sizeof(data_buffer));
+    memset(data_buffer, 0, sizeof(data_buffer));
 
     int heart_rate = patient_data.heartRate;
     int hr_length = snprintf(data_buffer, UART_BUFFER_SIZE, "%d\r\n", heart_rate);
     HAL_UART_Transmit(&huart3, (uint8_t *)heartrate, sizeof(heartrate), HAL_MAX_DELAY);
     HAL_UART_Transmit(&huart3, (uint8_t *)data_buffer, hr_length, HAL_MAX_DELAY);
-    //memset(data_buffer, 0, sizeof(data_buffer));
+    memset(data_buffer, 0, sizeof(data_buffer));
 
 
     int oxygen_percentage = patient_data.oxygen_percentage;
     int o2_length = snprintf(data_buffer, UART_BUFFER_SIZE, "%d\r\n", oxygen_percentage);
     HAL_UART_Transmit(&huart3, (uint8_t *)o2, sizeof(o2), HAL_MAX_DELAY);
     HAL_UART_Transmit(&huart3, (uint8_t *)data_buffer, o2_length, HAL_MAX_DELAY);
-
-
-    //HAL_UART_Transmit(&huart3, (uint8_t *)newline, sizeof(newline), HAL_MAX_DELAY);
-    //memcpy(data_buffer, (void *)patient_data.temperature, sizeof(patient_data.oxygen_percentage));
-    //HAL_UART_Transmit(&huart3, (uint8_t *)o2, sizeof(o2), HAL_MAX_DELAY);
-    // HAL_UART_Transmit(&huart3, (uint8_t *)data_buffer, sizeof(data_buffer), HAL_MAX_DELAY);
-    //HAL_UART_Transmit(&huart3, (uint8_t *)newline, sizeof(newline), HAL_MAX_DELAY);
-    //memcpy(data_buffer, (void *)patient_data.temperature, sizeof(patient_data.heartRate));
-    //HAL_UART_Transmit(&huart3, (uint8_t *)heartrate, sizeof(heartrate), HAL_MAX_DELAY);
-	// HAL_UART_Transmit(&huart3, (uint8_t *)data_buffer, sizeof(data_buffer), HAL_MAX_DELAY);
-	//HAL_UART_Transmit(&huart3, (uint8_t *)newline, sizeof(newline), HAL_MAX_DELAY);
-
 
 
     if (patient_data.temperature > 98) {
@@ -212,9 +200,8 @@ int main(void)
     	HAL_GPIO_TogglePin(red_led_GPIO_Port, red_led_Pin); // visual alert
     }
 
-
     // reset flag
-    //normal = 1;
+    normal = 1;
 
     // simulate delay (1s), pause so can see status, then reset lights for next iteration
 	HAL_Delay(500);
