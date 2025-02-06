@@ -19,12 +19,13 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "usb_host.h"
-#include "patient_data.h"
-#include <string.h>
-#include "generate_data.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "patient_data.h"
+#include "generate_data.h"
+#include <string.h>
+#include <stdio.h>
 
 /* USER CODE END Includes */
 
@@ -35,6 +36,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+#define UART_BUFFER_SIZE 64
 
 /* USER CODE END PD */
 
@@ -50,7 +52,7 @@ I2S_HandleTypeDef hi2s3;
 
 SPI_HandleTypeDef hspi1;
 
-UART_HandleTypeDef huart2;
+UART_HandleTypeDef huart3;
 
 /* USER CODE BEGIN PV */
 
@@ -62,7 +64,7 @@ static void MX_GPIO_Init(void);
 static void MX_I2C1_Init(void);
 static void MX_I2S3_Init(void);
 static void MX_SPI1_Init(void);
-static void MX_USART2_UART_Init(void);
+static void MX_USART3_UART_Init(void);
 void MX_USB_HOST_Process(void);
 
 /* USER CODE BEGIN PFP */
@@ -107,27 +109,28 @@ int main(void)
   MX_I2S3_Init();
   MX_SPI1_Init();
   MX_USB_HOST_Init();
-  MX_USART2_UART_Init();
+  MX_USART3_UART_Init();
   /* USER CODE BEGIN 2 */
 
   PatientData patient_data;
 //  float float_buffer[100];
-  int data_buffer[10];
+  char data_buffer[UART_BUFFER_SIZE];
+
 
   char temp[] = "Body temperature: ";
   char o2[] = "Blood oxygen percentage: ";
   char heartrate[] = "Heart rate: ";
   char newline[] = "\n";
 
-  char msg_ok[] = "Vitals stable.\n";
+  char msg_ok[] = "Vitals stable.\n \r";
 
-  char msg_brady[] = "Alert: Bradycardia detected.\n";
-  char msg_tachy[] = "Alert: Tachycardia detected.\n";
+  char msg_brady[] = "Alert: Bradycardia detected. \n \r";
+  char msg_tachy[] = "Alert: Tachycardia detected. \n \r";
 
-  char msg_low_o2[] = "Alert: Low oxygen saturation detected.\n";
+  char msg_low_o2[] = "Alert: Low oxygen saturation detected.\n \r";
 
-  char msg_hypo[] = "Alert: Hypothermia detected.\n";
-  char msg_fever[] = "Alert: Fever detected.\n";
+  char msg_hypo[] = "Alert: Hypothermia detected.\n \r";
+  char msg_fever[] = "Alert: Fever detected.\n \r";
   int8_t normal = 1;
 
   /* USER CODE END 2 */
@@ -146,53 +149,72 @@ int main(void)
     generate_data(&patient_data);
     // log_data(&patientData);
 
-    memcpy(data_buffer, (void *)patient_data.temperature, sizeof(patient_data.temperature));
-    HAL_UART_Transmit(&huart2, (uint8_t *)temp, sizeof(temp), HAL_MAX_DELAY);
-    HAL_UART_Transmit(&huart2, (uint8_t *)data_buffer, sizeof(data_buffer), HAL_MAX_DELAY);
-    HAL_UART_Transmit(&huart2, (uint8_t *)newline, sizeof(newline), HAL_MAX_DELAY);
-    memcpy(data_buffer, (void *)patient_data.temperature, sizeof(patient_data.oxygen_percentage));
-    HAL_UART_Transmit(&huart2, (uint8_t *)o2, sizeof(o2), HAL_MAX_DELAY);
-    HAL_UART_Transmit(&huart2, (uint8_t *)data_buffer, sizeof(data_buffer), HAL_MAX_DELAY);
-    HAL_UART_Transmit(&huart2, (uint8_t *)newline, sizeof(newline), HAL_MAX_DELAY);
-    memcpy(data_buffer, (void *)patient_data.temperature, sizeof(patient_data.heartRate));
-    HAL_UART_Transmit(&huart2, (uint8_t *)heartrate, sizeof(heartrate), HAL_MAX_DELAY);
-	HAL_UART_Transmit(&huart2, (uint8_t *)data_buffer, sizeof(data_buffer), HAL_MAX_DELAY);
-	HAL_UART_Transmit(&huart2, (uint8_t *)newline, sizeof(newline), HAL_MAX_DELAY);
+    //memcpy(data_buffer, (void *)patient_data.temperature, sizeof(patient_data.temperature));
+    int body_temp = patient_data.temperature;
+    int bt_length = snprintf(data_buffer, UART_BUFFER_SIZE, "%d\r\n", body_temp);
+    HAL_UART_Transmit(&huart3, (uint8_t *)temp, sizeof(temp), HAL_MAX_DELAY);
+    HAL_UART_Transmit(&huart3, (uint8_t *)data_buffer, bt_length, HAL_MAX_DELAY);
+    //memset(data_buffer, 0, sizeof(data_buffer));
+
+    int heart_rate = patient_data.heartRate;
+    int hr_length = snprintf(data_buffer, UART_BUFFER_SIZE, "%d\r\n", heart_rate);
+    HAL_UART_Transmit(&huart3, (uint8_t *)heartrate, sizeof(heartrate), HAL_MAX_DELAY);
+    HAL_UART_Transmit(&huart3, (uint8_t *)data_buffer, hr_length, HAL_MAX_DELAY);
+    //memset(data_buffer, 0, sizeof(data_buffer));
+
+
+    int oxygen_percentage = patient_data.oxygen_percentage;
+    int o2_length = snprintf(data_buffer, UART_BUFFER_SIZE, "%d\r\n", oxygen_percentage);
+    HAL_UART_Transmit(&huart3, (uint8_t *)o2, sizeof(o2), HAL_MAX_DELAY);
+    HAL_UART_Transmit(&huart3, (uint8_t *)data_buffer, o2_length, HAL_MAX_DELAY);
+
+
+    //HAL_UART_Transmit(&huart3, (uint8_t *)newline, sizeof(newline), HAL_MAX_DELAY);
+    //memcpy(data_buffer, (void *)patient_data.temperature, sizeof(patient_data.oxygen_percentage));
+    //HAL_UART_Transmit(&huart3, (uint8_t *)o2, sizeof(o2), HAL_MAX_DELAY);
+    // HAL_UART_Transmit(&huart3, (uint8_t *)data_buffer, sizeof(data_buffer), HAL_MAX_DELAY);
+    //HAL_UART_Transmit(&huart3, (uint8_t *)newline, sizeof(newline), HAL_MAX_DELAY);
+    //memcpy(data_buffer, (void *)patient_data.temperature, sizeof(patient_data.heartRate));
+    //HAL_UART_Transmit(&huart3, (uint8_t *)heartrate, sizeof(heartrate), HAL_MAX_DELAY);
+	// HAL_UART_Transmit(&huart3, (uint8_t *)data_buffer, sizeof(data_buffer), HAL_MAX_DELAY);
+	//HAL_UART_Transmit(&huart3, (uint8_t *)newline, sizeof(newline), HAL_MAX_DELAY);
+
 
 
     if (patient_data.temperature > 98) {
-    	HAL_UART_Transmit(&huart2, (uint8_t *)msg_fever, sizeof(msg_fever), HAL_MAX_DELAY);
+    	HAL_UART_Transmit(&huart3, (uint8_t *)msg_fever, sizeof(msg_fever), HAL_MAX_DELAY);
         normal = 0;
     }
     else if (patient_data.temperature < 95) {
-    	HAL_UART_Transmit(&huart2, (uint8_t *)msg_hypo, sizeof(msg_hypo), HAL_MAX_DELAY);
+    	HAL_UART_Transmit(&huart3, (uint8_t *)msg_hypo, sizeof(msg_hypo), HAL_MAX_DELAY);
         normal = 0;
     }
 
     if (patient_data.heartRate > 100) {
-    	HAL_UART_Transmit(&huart2, (uint8_t *)msg_tachy, sizeof(msg_tachy), HAL_MAX_DELAY);
+    	HAL_UART_Transmit(&huart3, (uint8_t *)msg_tachy, sizeof(msg_tachy), HAL_MAX_DELAY);
         normal = 0;
     }
     else if (patient_data.heartRate < 60) {
-    	HAL_UART_Transmit(&huart2, (uint8_t *)msg_brady, sizeof(msg_brady), HAL_MAX_DELAY);
+    	HAL_UART_Transmit(&huart3, (uint8_t *)msg_brady, sizeof(msg_brady), HAL_MAX_DELAY);
         normal = 0;
     }
 
     if (patient_data.oxygen_percentage < 90) {
-    	HAL_UART_Transmit(&huart2, (uint8_t *)msg_low_o2, sizeof(msg_low_o2), HAL_MAX_DELAY);
+    	HAL_UART_Transmit(&huart3, (uint8_t *)msg_low_o2, sizeof(msg_low_o2), HAL_MAX_DELAY);
         normal = 0;
     }
 
     if (normal) {
-    	HAL_UART_Transmit(&huart2, (uint8_t *)msg_ok, sizeof(msg_ok), HAL_MAX_DELAY);
-    	HAL_GPIO_TogglePin(green_led_GPIO_Port, green_led_Pin); // vitals ok
+    	HAL_UART_Transmit(&huart3, (uint8_t *)msg_ok, sizeof(msg_ok), HAL_MAX_DELAY);
+    	HAL_GPIO_TogglePin(green_led_GPIO_Port, green_led_Pin); // visual indication of vitals ok
     }
     else {
-    	HAL_GPIO_TogglePin(red_led_GPIO_Port, red_led_Pin); // alert
+    	HAL_GPIO_TogglePin(red_led_GPIO_Port, red_led_Pin); // visual alert
     }
 
+
     // reset flag
-    normal = 1;
+    //normal = 1;
 
     // simulate delay (1s), pause so can see status, then reset lights for next iteration
 	HAL_Delay(500);
@@ -357,35 +379,35 @@ static void MX_SPI1_Init(void)
 }
 
 /**
-  * @brief USART2 Initialization Function
+  * @brief USART3 Initialization Function
   * @param None
   * @retval None
   */
-static void MX_USART2_UART_Init(void)
+static void MX_USART3_UART_Init(void)
 {
 
-  /* USER CODE BEGIN USART2_Init 0 */
+  /* USER CODE BEGIN USART3_Init 0 */
 
-  /* USER CODE END USART2_Init 0 */
+  /* USER CODE END USART3_Init 0 */
 
-  /* USER CODE BEGIN USART2_Init 1 */
+  /* USER CODE BEGIN USART3_Init 1 */
 
-  /* USER CODE END USART2_Init 1 */
-  huart2.Instance = USART2;
-  huart2.Init.BaudRate = 115200;
-  huart2.Init.WordLength = UART_WORDLENGTH_8B;
-  huart2.Init.StopBits = UART_STOPBITS_1;
-  huart2.Init.Parity = UART_PARITY_NONE;
-  huart2.Init.Mode = UART_MODE_TX_RX;
-  huart2.Init.HwFlowCtl = UART_HWCONTROL_NONE;
-  huart2.Init.OverSampling = UART_OVERSAMPLING_16;
-  if (HAL_UART_Init(&huart2) != HAL_OK)
+  /* USER CODE END USART3_Init 1 */
+  huart3.Instance = USART3;
+  huart3.Init.BaudRate = 115200;
+  huart3.Init.WordLength = UART_WORDLENGTH_8B;
+  huart3.Init.StopBits = UART_STOPBITS_1;
+  huart3.Init.Parity = UART_PARITY_NONE;
+  huart3.Init.Mode = UART_MODE_TX_RX;
+  huart3.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart3.Init.OverSampling = UART_OVERSAMPLING_16;
+  if (HAL_UART_Init(&huart3) != HAL_OK)
   {
     Error_Handler();
   }
-  /* USER CODE BEGIN USART2_Init 2 */
+  /* USER CODE BEGIN USART3_Init 2 */
 
-  /* USER CODE END USART2_Init 2 */
+  /* USER CODE END USART3_Init 2 */
 
 }
 
