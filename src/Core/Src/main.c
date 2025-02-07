@@ -167,7 +167,7 @@ int main(void)
     int o2_length = snprintf(data_buffer, UART_BUFFER_SIZE, "%d\r\n", oxygen_percentage);
     HAL_UART_Transmit(&huart3, (uint8_t *)o2, sizeof(o2), HAL_MAX_DELAY);
     HAL_UART_Transmit(&huart3, (uint8_t *)data_buffer, o2_length, HAL_MAX_DELAY);
-
+    memset(data_buffer, 0, sizeof(data_buffer));
 
     if (patient_data.temperature > 98) {
     	HAL_UART_Transmit(&huart3, (uint8_t *)msg_fever, sizeof(msg_fever), HAL_MAX_DELAY);
