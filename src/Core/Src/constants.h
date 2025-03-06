@@ -8,4 +8,6 @@
 #define OX_MAX 100
 #define OX_MIN 85
 
+#define NUM_USERS 10 // amount of users we will monitor at a time
+
 #endif // CONSTANTS_H
